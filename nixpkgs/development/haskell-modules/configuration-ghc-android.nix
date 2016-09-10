@@ -41,9 +41,9 @@ self: super: {
   cmdargs = disableCabalFlag super.cmdargs "quotation";
 
   # ekmett/linear#74
-  linear = overrideCabal super.linear (drv: {
-    prePatch = "sed -i 's/-Werror//g' linear.cabal";
-  });
+  /* linear = overrideCabal super.linear (drv: { */
+  /*   prePatch = "sed -i 's/-Werror//g' linear.cabal"; */
+  /* }); */
 
   # Cabal_1_22_1_1 requires filepath >=1 && <1.4
   cabal-install = dontCheck (super.cabal-install.override { Cabal = null; });
@@ -62,19 +62,19 @@ self: super: {
     postUnpack = "sourceRoot+=/Cabal";
   });
 
-  idris =
-    let idris' = overrideCabal super.idris (drv: {
-      # "idris" binary cannot find Idris library otherwise while building.
-      # After installing it's completely fine though. Seems like Nix-specific
-      # issue so not reported.
-      preBuild = "export LD_LIBRARY_PATH=$PWD/dist/build:$LD_LIBRARY_PATH";
-      # https://github.com/idris-lang/Idris-dev/issues/2499
-      librarySystemDepends = (drv.librarySystemDepends or []) ++ [pkgs.gmp];
-    });
-    in idris'.overrideScope (self: super: {
-      # https://github.com/idris-lang/Idris-dev/issues/2500
-      zlib = self.zlib_0_5_4_2;
-    });
+  /* idris = */
+  /*   let idris' = overrideCabal super.idris (drv: { */
+  /*     # "idris" binary cannot find Idris library otherwise while building. */
+  /*     # After installing it's completely fine though. Seems like Nix-specific */
+  /*     # issue so not reported. */
+  /*     preBuild = "export LD_LIBRARY_PATH=$PWD/dist/build:$LD_LIBRARY_PATH"; */
+  /*     # https://github.com/idris-lang/Idris-dev/issues/2499 */
+  /*     librarySystemDepends = (drv.librarySystemDepends or []) ++ [pkgs.gmp]; */
+  /*   }); */
+  /*   in idris'.overrideScope (self: super: { */
+  /*     # https://github.com/idris-lang/Idris-dev/issues/2500 */
+  /*     zlib = self.zlib_0_5_4_2; */
+  /*   }); */
 
   Extra = appendPatch super.Extra (pkgs.fetchpatch {
     url = "https://github.com/seereason/sr-extra/commit/29787ad4c20c962924b823d02a7335da98143603.patch";
@@ -86,8 +86,17 @@ self: super: {
   bytestring-builder = dontHaddock super.bytestring-builder;
 
   # We have time 1.5
-  aeson = let aeson' = overrideCabal super.aeson (drv: { postPatch = "sed -i -e 's|Data.Aeson.TH|--Data.Aeson.TH|' aeson.cabal"; });
-          in disableCabalFlag aeson' "old-locale";
+  time-locale-compat = disableCabalFlag super.time-locale-compat "old-locale";
+  aeson = let aeson' = overrideCabal super.aeson_1_0_0_0 (drv: {
+      version = "1.0.0.0";
+      src = pkgs.fetchFromGitHub {
+        owner = "lynnard";
+        repo = "aeson";
+        rev = "acf53242c403463dd33454919e56116c4e2354dc";
+        sha256 = "1qvxcay67b5q14s0vlgzm5m04ad68xiv6h48n5z7yg1fr9wb8cfm";
+      };
+    });
+    in disableCabalFlag aeson' "old-locale";
 
   # requires filepath >=1.1 && <1.4
   Glob = doJailbreak super.Glob;
@@ -131,22 +140,22 @@ self: super: {
   # https://github.com/kazu-yamamoto/unix-time/issues/30
   unix-time = dontCheck super.unix-time;
 
-  present = appendPatch super.present (pkgs.fetchpatch {
-    url = "https://github.com/chrisdone/present/commit/6a61f099bf01e2127d0c68f1abe438cd3eaa15f7.patch";
-    sha256 = "1vn3xm38v2f4lzyzkadvq322f3s2yf8c88v56wpdpzfxmvlzaqr8";
-  });
+  /* present = appendPatch super.present (pkgs.fetchpatch { */
+  /*   url = "https://github.com/chrisdone/present/commit/6a61f099bf01e2127d0c68f1abe438cd3eaa15f7.patch"; */
+  /*   sha256 = "1vn3xm38v2f4lzyzkadvq322f3s2yf8c88v56wpdpzfxmvlzaqr8"; */
+  /* }); */
 
-  ghcjs-prim = self.callPackage ({ mkDerivation, fetchgit, primitive }: mkDerivation {
-    pname = "ghcjs-prim";
-    version = "0.1.0.0";
-    src = fetchgit {
-      url = git://github.com/ghcjs/ghcjs-prim.git;
-      rev = "dfeaab2aafdfefe46bf12960d069f28d2e5f1454"; # ghc-7.10 branch
-      sha256 = "19kyb26nv1hdpp0kc2gaxkq5drw5ib4za0641py5i4bbf1g58yvy";
-    };
-    buildDepends = [ primitive ];
-    license = pkgs.stdenv.lib.licenses.bsd3;
-  }) {};
+  /* ghcjs-prim = self.callPackage ({ mkDerivation, fetchgit, primitive }: mkDerivation { */
+  /*   pname = "ghcjs-prim"; */
+  /*   version = "0.1.0.0"; */
+  /*   src = fetchgit { */
+  /*     url = git://github.com/ghcjs/ghcjs-prim.git; */
+  /*     rev = "dfeaab2aafdfefe46bf12960d069f28d2e5f1454"; # ghc-7.10 branch */
+  /*     sha256 = "19kyb26nv1hdpp0kc2gaxkq5drw5ib4za0641py5i4bbf1g58yvy"; */
+  /*   }; */
+  /*   buildDepends = [ primitive ]; */
+  /*   license = pkgs.stdenv.lib.licenses.bsd3; */
+  /* }) {}; */
 
   # diagrams/monoid-extras#19
   monoid-extras = overrideCabal super.monoid-extras (drv: {
@@ -154,28 +163,23 @@ self: super: {
   });
 
   # diagrams/statestack#5
-  statestack = overrideCabal super.statestack (drv: {
-    prePatch = "sed -i 's|4\.8|4.9|' statestack.cabal";
-  });
+  /* statestack = overrideCabal super.statestack (drv: { */
+  /*   prePatch = "sed -i 's|4\.8|4.9|' statestack.cabal"; */
+  /* }); */
 
   # diagrams/diagrams-core#83
-  diagrams-core = overrideCabal super.diagrams-core (drv: {
-    prePatch = "sed -i 's|4\.8|4.9|' diagrams-core.cabal";
-  });
+  /* diagrams-core = overrideCabal super.diagrams-core (drv: { */
+  /*   prePatch = "sed -i 's|4\.8|4.9|' diagrams-core.cabal"; */
+  /* }); */
 
   timezone-series = doJailbreak super.timezone-series;
   timezone-olson = doJailbreak super.timezone-olson;
   libmpd = dontCheck super.libmpd;
-  xmonad-extras = overrideCabal super.xmonad-extras (drv: {
-    postPatch = ''
-      sed -i -e "s,<\*,<¤,g" XMonad/Actions/Volume.hs
-    '';
-  });
 
   # Workaround for a workaround, see comment for "ghcjs" flag.
-  jsaddle = let jsaddle' = disableCabalFlag super.jsaddle "ghcjs";
-            in addBuildDepends jsaddle' [ self.glib self.gtk3 self.webkitgtk3
-                                          self.webkitgtk3-javascriptcore ];
+  /* jsaddle = let jsaddle' = disableCabalFlag super.jsaddle "ghcjs"; */
+  /*           in addBuildDepends jsaddle' [ self.glib self.gtk3 self.webkitgtk3 */
+  /*                                         self.webkitgtk3-javascriptcore ]; */
 
   # https://github.com/cartazio/arithmoi/issues/1
   arithmoi = markBroken super.arithmoi;
@@ -216,6 +220,7 @@ self: super: {
   control-monad-free_0_5_3 = markBroken super.control-monad-free_0_5_3;
   haddock-api_2_15_0_2 = markBroken super.haddock-api_2_15_0_2;
   QuickCheck_1_2_0_1 = markBroken super.QuickCheck_1_2_0_1;
+  QuickCheck_2_9_1 = markBroken super.QuickCheck_2_9_1;
   seqid-streams_0_1_0 = markBroken super.seqid-streams_0_1_0;
   vector_0_10_9_2 = markBroken super.vector_0_10_9_2;
   hoopl_3_10_2_0 = markBroken super.hoopl_3_10_2_0;
@@ -281,8 +286,52 @@ self: super: {
   # no template haskell
   monad-logger = disableCabalFlag super.monad-logger "template_haskell";
 
+  QuickCheck = disableCabalFlag super.QuickCheck "templateHaskell";
+
   # do not use getProtocolNumber
-  network = appendPatch (appendPatch super.network ./patches/network-android.patch) ./patches/network-tcp-for-bionic.patch;
+  /* network = appendPatch (appendPatch super.network ./patches/network-android.patch) ./patches/network-tcp-for-bionic.patch; */
+  # use the older version of network for now
+  network = let network' = self.callPackage
+    ({ mkDerivation, base, bytestring, HUnit, test-framework
+     , test-framework-hunit, unix
+     }:
+     mkDerivation {
+       pname = "network";
+       version = "2.6.2.1";
+       sha256 = "a3fda15c9bbe2c7274d97f40398c6cf8d1d3a9fe896fbf6531e1bfc849bb1bfa";
+       libraryHaskellDepends = [ base bytestring unix ];
+       testHaskellDepends = [
+         base bytestring HUnit test-framework test-framework-hunit
+       ];
+       homepage = "https://github.com/haskell/network";
+       description = "Low-level networking interface";
+       license = pkgs.stdenv.lib.licenses.bsd3;
+     }) {};
+     in appendPatch (appendPatch network' ./patches/network-android.patch) ./patches/network-tcp-for-bionic.patch;
+  /* network = self.callPackage */
+  /*   ({ mkDerivation, base, bytestring, doctest, HUnit, test-framework */
+  /*    , test-framework-hunit, unix, autoconf */
+  /*    }: */
+  /*    mkDerivation { */
+  /*      pname = "network"; */
+  /*      version = "2.6.3.1"; */
+  /*      src = pkgs.fetchFromGitHub { */
+  /*        owner = "lynnard"; */
+  /*        repo = "network"; */
+  /*        rev = "2eb5a79d1c607e212b2100107e8ab8d9c8f03c09"; */
+  /*        sha256 = "0wnpsfr5palppvrl31cmbd7ldld468sdsy1025w2fkwdfdpafx15"; */
+  /*      }; */
+  /*      libraryHaskellDepends = [ base bytestring unix ]; */
+  /*      testHaskellDepends = [ */
+  /*        base bytestring doctest HUnit test-framework test-framework-hunit */
+  /*      ]; */
+  /*      doCheck = false; */
+  /*      homepage = "https://github.com/haskell/network"; */
+  /*      description = "Low-level networking interface"; */
+  /*      license = pkgs.stdenv.lib.licenses.bsd3; */
+  /*      buildTools = [ autoconf ]; */
+  /*      preConfigure = "env autoreconf"; */
+  /*    }) {}; */
 
   double-conversion = overrideCabal super.double-conversion (drv: {
     version = "2.0.1.1";
@@ -294,10 +343,36 @@ self: super: {
     };
   });
 
-  hlint = overrideCabal super.hlint (drv: {
-    version = "1.9.28";
-    sha256 = "047pqyjf13ma2f3igk7vrrlaz42sbrnmljfw4bss2qn33656a1pb";
-  });
-
   reflection = disableCabalFlag super.reflection "template-haskell";
+
+  # reflex related changes
+  bifunctors = overrideCabal super.bifunctors (drv: {
+     postPatch = "sed -i -e 's|Data.Bifunctor.TH|--Data.Bifunctor.TH|' bifunctors.cabal"; 
+  });
+  reflex = self.callPackage
+    ({ mkDerivation, base, containers, dependent-map, dependent-sum
+     , exception-transformers, MemoTrie, mtl, primitive, ref-tf, semigroups, syb
+     , these, transformers, transformers-compat, lens, monad-control
+     }:
+     mkDerivation {
+       pname = "reflex";
+       version = "0.5.0";
+       libraryHaskellDepends = [
+         base containers dependent-map dependent-sum exception-transformers
+         mtl primitive ref-tf semigroups MemoTrie lens monad-control
+         syb these transformers transformers-compat
+       ];
+       testHaskellDepends = [
+         base containers dependent-map MemoTrie mtl ref-tf
+       ];
+       src = pkgs.fetchFromGitHub {
+         owner = "lynnard";
+         repo = "reflex";
+         rev = "04560dab0677c7c3e63a28395b419f5add05403e";
+         sha256 = "121crm0fk7rny3swxqy609m5yd9pr7kc4g21zdxfkpgi7k596nh1";
+       };
+       homepage = "https://github.com/reflex-frp/reflex";
+       description = "Higher-order Functional Reactive Programming";
+       license = pkgs.stdenv.lib.licenses.bsd3;
+     }) {};
 }

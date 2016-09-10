@@ -19,7 +19,10 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
           protocol-buffers-descriptor 
           text-binary
           network-simple
-          monad-loops ]);
+          monad-loops
+          lens
+          reflex
+        ]);
 
     protobuf-android = import ./protobuf.nix {inherit protobuf androidndk ndkWrapper;};
 
