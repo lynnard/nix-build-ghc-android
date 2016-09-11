@@ -22,6 +22,7 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
           monad-loops
           lens
           reflex
+          diagrams-lib
         ]);
 
     protobuf-android = import ./protobuf.nix {inherit protobuf androidndk ndkWrapper;};

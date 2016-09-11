@@ -40,11 +40,6 @@ self: super: {
 
   cmdargs = disableCabalFlag super.cmdargs "quotation";
 
-  # ekmett/linear#74
-  /* linear = overrideCabal super.linear (drv: { */
-  /*   prePatch = "sed -i 's/-Werror//g' linear.cabal"; */
-  /* }); */
-
   # Cabal_1_22_1_1 requires filepath >=1 && <1.4
   cabal-install = dontCheck (super.cabal-install.override { Cabal = null; });
 
@@ -375,4 +370,28 @@ self: super: {
        description = "Higher-order Functional Reactive Programming";
        license = pkgs.stdenv.lib.licenses.bsd3;
      }) {};
+
+  # ekmett/linear#74
+  /* linear = overrideCabal super.linear (drv: { */
+  /*   prePatch = "sed -i 's/-Werror//g' linear.cabal"; */
+  /* }); */
+  linear = disableCabalFlag super.linear "template-haskell";
+  active = overrideCabal super.active (drv: {
+    version = "0.2.0.11";
+    src = pkgs.fetchFromGitHub {
+      owner = "lynnard";
+      repo = "active";
+      rev = "c585b08274ef55b0d8bd1365d50b6a16a91f6282";
+      sha256 = "1pg417nh1cybwjc9y5gm39qvckfvw6f55cs21a54g8wink12sha9";
+    };
+  });
+  diagrams-lib = overrideCabal super.diagrams-lib (drv: {
+    version = "1.3.1.3";
+    src = pkgs.fetchFromGitHub {
+      owner = "lynnard";
+      repo = "diagrams-lib";
+      rev = "7aa513064165633430d4815a31c035c9a4ce3550";
+      sha256 = "1aw8bh2y4iwyjxk1xfdx2wsvyln425r0fgzp89ck729898mi99zy";
+    };
+  });
 }
