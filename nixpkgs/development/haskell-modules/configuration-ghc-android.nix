@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, androidenv }:
 
 with import ./lib.nix { inherit pkgs; };
 
@@ -344,32 +344,63 @@ self: super: {
   bifunctors = overrideCabal super.bifunctors (drv: {
      postPatch = "sed -i -e 's|Data.Bifunctor.TH|--Data.Bifunctor.TH|' bifunctors.cabal"; 
   });
-  reflex = self.callPackage
-    ({ mkDerivation, base, containers, dependent-map, dependent-sum
-     , exception-transformers, MemoTrie, mtl, primitive, ref-tf, semigroups, syb
-     , these, transformers, transformers-compat, lens, monad-control
-     }:
+  dependent-sum = self.callPackage
+    ({ mkDerivation, base }:
      mkDerivation {
-       pname = "reflex";
-       version = "0.5.0";
-       libraryHaskellDepends = [
-         base containers dependent-map dependent-sum exception-transformers
-         mtl primitive ref-tf semigroups MemoTrie lens monad-control
-         syb these transformers transformers-compat
-       ];
-       testHaskellDepends = [
-         base containers dependent-map MemoTrie mtl ref-tf
-       ];
-       src = pkgs.fetchFromGitHub {
-         owner = "lynnard";
-         repo = "reflex";
-         rev = "04560dab0677c7c3e63a28395b419f5add05403e";
-         sha256 = "121crm0fk7rny3swxqy609m5yd9pr7kc4g21zdxfkpgi7k596nh1";
-       };
-       homepage = "https://github.com/reflex-frp/reflex";
-       description = "Higher-order Functional Reactive Programming";
-       license = pkgs.stdenv.lib.licenses.bsd3;
+       pname = "dependent-sum";
+       version = "0.4";
+       sha256 = "07hs9s78wiybwjwkal2yq65hdavq0gg1h2ld7wbph61s2nsfrpm8";
+       libraryHaskellDepends = [ base ];
+       homepage = "https://github.com/mokus0/dependent-sum";
+       description = "Dependent sum type";
+       license = "unknown";
      }) {};
+  dependent-map = self.callPackage
+    ({ mkDerivation, base, containers, dependent-sum, semigroups }:
+     mkDerivation {
+       pname = "dependent-map";
+       version = "0.2.4.0";
+       sha256 = "0il2naf6gdkvkhscvqd8kg9v911vdhqp9h10z5546mninnyrdcsx";
+       libraryHaskellDepends = [ base containers dependent-sum semigroups ];
+       homepage = "https://github.com/mokus0/dependent-map";
+       description = "Dependent finite maps (partial dependent products)";
+       license = "unknown";
+     }) {};
+  reflex =
+    let reflex' = self.callPackage
+      ({ mkDerivation, base, containers, dependent-map, dependent-sum
+      , exception-transformers, MemoTrie, mtl, primitive, ref-tf, semigroups, syb
+      , these, transformers, transformers-compat, lens, monad-control
+      , data-default, prim-uniq
+      }:
+      mkDerivation {
+        pname = "reflex";
+        version = "0.5.0";
+        libraryHaskellDepends = [
+          base containers dependent-map dependent-sum exception-transformers
+          mtl primitive ref-tf semigroups MemoTrie lens monad-control
+          syb these transformers transformers-compat data-default prim-uniq
+        ];
+        testHaskellDepends = [
+          base containers dependent-map MemoTrie mtl ref-tf
+        ];
+        # src = pkgs.fetchFromGitHub {
+        #   owner = "lynnard";
+        #   repo = "reflex";
+        #   rev = "04560dab0677c7c3e63a28395b419f5add05403e";
+        #   sha256 = "121crm0fk7rny3swxqy609m5yd9pr7kc4g21zdxfkpgi7k596nh1";
+        # };
+        src = pkgs.fetchFromGitHub {
+          owner = "reflex-frp";
+          repo = "reflex";
+          rev = "c617057bc4b9f6b75e4f4ebe2a4f2f818bd7d1a0";
+          sha256 = "0mgjmv1n1faa4r6kcw13b9hvxfsyrrwv24nan24yxwpjzn9psa2p";
+        };
+        homepage = "https://github.com/reflex-frp/reflex";
+        description = "Higher-order Functional Reactive Programming";
+        license = pkgs.stdenv.lib.licenses.bsd3;
+      }) {};
+    in disableCabalFlag reflex' "use-template-haskell";
 
   # ekmett/linear#74
   /* linear = overrideCabal super.linear (drv: { */
@@ -394,4 +425,91 @@ self: super: {
       sha256 = "1aw8bh2y4iwyjxk1xfdx2wsvyln425r0fgzp89ck729898mi99zy";
     };
   });
+
+  # hoppy-runtime
+  hoppy-runtime = overrideCabal super.hoppy-runtime (drv: {
+    version = "0.3.0";
+    sha256 = "1nd9mgzqnak420dcifldq09c7sph7mf8llrsfagphq9aqhw3lij4";
+  });
+  # hoppy-runtime = self.callPackage
+  #   ({ mkDerivation, base, containers }:
+  #    mkDerivation {
+  #      pname = "hoppy-runtime";
+  #      version = "0.3.0";
+  #      sha256 = "1nd9mgzqnak420dcifldq09c7sph7mf8llrsfagphq9aqhw3lij4";
+  #      libraryHaskellDepends = [ base containers ];
+  #      homepage = "https://github.com/lynnard/hoppy-runtime";
+  #      description = "Hoppy-runtime mirror clone";
+  #      license = "unknown";
+  #    }) {};
+
+  # MonadRandom
+  MonadRandom = self.callPackage
+    ({ mkDerivation, base, mtl, random, transformers
+     , transformers-compat, fail, primitive
+     }:
+     mkDerivation {
+       pname = "MonadRandom";
+       version = "0.5.1";
+       sha256 = "11qdfghizww810vdj9ac1f5qr5kdmrk40l6w6qh311bjh290ygwy";
+       libraryHaskellDepends = [
+         base mtl random transformers transformers-compat fail primitive
+       ];
+       description = "Random-number generation monad";
+       license = "unknown";
+     }) {};
+
+  # cocos2d-hs
+  cocos2d-hs = self.callPackage
+    ({ mkDerivation, base, hoppy-runtime, colour, linear }:
+     mkDerivation {
+       pname = "cocos2d-hs";
+       version = "0.1.0.0";
+       libraryHaskellDepends = [ base hoppy-runtime colour linear ];
+       homepage = "https://github.com/lynnard/cocos2d-hs";
+       description = "cocos2d haskell binding";
+       license = "unknown";
+       src = pkgs.fetchFromGitHub {
+         owner = "lynnard";
+         repo = "cocos2d-hs";
+         rev = "46b2ab08ba9af0c9524b3d452a0abb3dc7e217f6";
+         sha256 = "0q913yyi2fkagc5b6n6ixswvigp5r87rwgyd5xj5lk8afi7ffzfh";
+       };
+     }) {};
+
+  # (custom) Hipmunk
+  Hipmunk = self.callPackage
+    ({ mkDerivation, base, array, containers, transformers, StateVar, linear, lens, data-default }:
+     mkDerivation {
+       pname = "Hipmunk";
+       version = "6.2.2.1";
+       libraryHaskellDepends = [ base array containers transformers StateVar linear lens data-default ];
+       homepage = "https://github.com/lynnard/Hipmunk";
+       description = "Chipmunk haskell binding";
+       license = "unknown";
+       src = pkgs.fetchFromGitHub {
+         owner = "lynnard";
+         repo = "Hipmunk";
+         rev = "c489b6f416866fb22e2aaa467ffa666b007faa27";
+         sha256 = "1mva0iw45vf5qh8yxrgm0sl2rjwq0zlvs7yxpzrcgzka5mgf4kjv";
+       };
+     }) {};
+
+  # reflex-cocos2d
+  reflex-cocos2d = self.callPackage
+    ({ mkDerivation, base, colour, containers, semigroups, mtl, monad-control, prim-uniq, primitive, dependent-map, ref-tf, dependent-sum, diagrams-lib, reflex, lens, time, data-default, contravariant, exception-transformers, free, cocos2d-hs, Hipmunk, StateVar, MonadRandom }:
+     mkDerivation {
+       pname = "reflex-cocos2d";
+       version = "0.1.0.0";
+       libraryHaskellDepends = [ base colour containers semigroups mtl monad-control prim-uniq primitive dependent-map ref-tf dependent-sum diagrams-lib reflex lens time data-default contravariant exception-transformers free cocos2d-hs Hipmunk StateVar MonadRandom ];
+       homepage = "https://github.com/lynnard/reflex-cocos2d";
+       description = "reflex frp abstraction on top of cocos2d-hs";
+       license = "unknown";
+       src = pkgs.fetchFromGitHub {
+         owner = "lynnard";
+         repo = "reflex-cocos2d";
+         rev = "842a3bf80e0e743b71c2d93600f0b245a348964d";
+         sha256 = "0a0wkmii4faz5bqip4nkr8gsr2ciq2zhn9ava1lw7qi0plbwb4jl";
+       };
+     }) {};
 }

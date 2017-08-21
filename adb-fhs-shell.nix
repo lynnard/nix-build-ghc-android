@@ -23,6 +23,14 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
           lens
           reflex
           diagrams-lib
+          MonadRandom
+          data-default
+          colour
+          linear
+          hoppy-runtime
+          cocos2d-hs
+          Hipmunk
+          reflex-cocos2d
         ]);
 
     protobuf-android = import ./protobuf.nix {inherit protobuf androidndk ndkWrapper;};
@@ -38,6 +46,8 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
 		hsenv ghc-android-env ndkWrapper
                 protobuf
                 pkgconfig
+                which
+                file
               ];
 	    multiPkgs = pkgs: with pkgs; [ zlib  ];
             runScript = "bash";
@@ -50,6 +60,11 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
 	      export ANDROID_NDK_ROOT=${androidenv.androidndk}/libexec/${androidenv.androidndk.name}
               export PROTOBUF=${protobuf-android}
               export PKG_CONFIG_PATH=$PROTOBUF/lib/pkgconfig:$PKG_CONFIG_PATH
+              export COCOS_FRAMEWORKS=$HOME/builds/cocos
+              export COCOS_CONSOLE_ROOT=$COCOS_FRAMEWORKS/cocos2d-x-3.9/tools/cocos2d-console/bin
+              export PATH=$COCOS_CONSOLE_ROOT:$PATH
+              export ANDROID_SDK_ROOT=$ANDROID_HOME
+              export NDK_ROOT=$ANDROID_NDK_ROOT
 	    '';
 	  };
 in stdenv.mkDerivation {
