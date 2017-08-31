@@ -1,4 +1,9 @@
-{ pkgs ? (import <nixpkgs>{}) }:
+{ pkgs ? (import ( (import <nixpkgs>{}).fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "f91f3a4c5a7672ead2d9a414acb1415a8bfb8260";
+    sha256 = "1iandzsvs399j9wqvbsmm2yhnspi8hjsr4zxqqzizfg5wb0l57vr";
+  }){}) }:
 
 with pkgs;
 
