@@ -472,9 +472,14 @@ self: super: {
        src = pkgs.fetchFromGitHub {
          owner = "lynnard";
          repo = "cocos2d-hs";
-         rev = "46b2ab08ba9af0c9524b3d452a0abb3dc7e217f6";
-         sha256 = "0q913yyi2fkagc5b6n6ixswvigp5r87rwgyd5xj5lk8afi7ffzfh";
+         rev = "899124e80e7bf499b06eebafff082dd6b8e51975";
+         sha256 = "1mkzv9a5af9msywqa99chq98gaa4130zxdlfjv28crzwwwda2gq2";
        };
+       configureFlags = [
+         "--extra-include-dirs=${androidenv.androidndk}/libexec/${androidenv.androidndk.name}/sources/cxx-stl/gnu-libstdc++/4.9/include"
+         "--extra-include-dirs=${androidenv.androidndk}/libexec/${androidenv.androidndk.name}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi/include"
+         "--extra-lib-dirs=${androidenv.androidndk}/libexec/${androidenv.androidndk.name}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi"
+       ];
      }) {};
 
   # (custom) Hipmunk
