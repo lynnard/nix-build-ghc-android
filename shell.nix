@@ -3,7 +3,9 @@
     repo = "nixpkgs";
     rev = "f91f3a4c5a7672ead2d9a414acb1415a8bfb8260";
     sha256 = "1iandzsvs399j9wqvbsmm2yhnspi8hjsr4zxqqzizfg5wb0l57vr";
-  }){}) }:
+  }){})
+, extraGhcPkgs ? (p: [])
+}:
 
 with pkgs;
 
@@ -36,12 +38,13 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
           cocos2d-hs
           Hipmunk
           reflex-cocos2d
-        ]);
+        ]
+        ++ extraGhcPkgs p
+        );
     protobuf-android = import ./protobuf.nix {inherit protobuf androidndk ndkWrapper;};
 in stdenv.mkDerivation {
      name = "android-env-shell";
      buildInputs =
-       (with pkgs;
        [ git gitRepo gnupg python2 curl procps openssl gnumake nettools
          androidenv.platformTools androidenv.androidsdk_5_1_1_extras
          androidenv.androidndk
@@ -51,8 +54,7 @@ in stdenv.mkDerivation {
          protobuf zlib
          pkgconfig
          which file
-       ]) ++
-       [ protobuf-android
+         protobuf-android
        ];
      shellHook = ''
         export USE_CCACHE=1
