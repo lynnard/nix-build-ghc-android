@@ -26,20 +26,21 @@ let ndkWrapper = import ./ndk-wrapper.nix { inherit stdenv makeWrapper androidnd
           protocol-buffers-descriptor
           text-binary
           network-simple
+          # useful dependencies that might be used a lot
+          # but themselves don't change that much
           monad-loops
           lens
-          reflex
           diagrams-lib
           MonadRandom
           data-default
           colour
           linear
           hoppy-runtime
-          cocos2d-hs
-          Hipmunk
-          reflex-cocos2d
+          StateVar
+          time
+          contravariant
         ]
-        ++ extraGhcPkgs p
+        ++ extraGhcPkgs { inherit pkgs androidenv; ghcAndroidPkgs = p;  }
         );
     protobuf-android = import ./protobuf.nix {inherit protobuf androidndk ndkWrapper;};
 in stdenv.mkDerivation {
